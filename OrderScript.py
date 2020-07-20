@@ -1,9 +1,8 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.action_chains import ActionChains
 import time
 
 PATH = "C:\Program Files (x86)\chromedriver"
@@ -21,69 +20,67 @@ continueButton3XPATH = "/html/body/div[4]/div/div[8]/form/div[1]/div[1]/div[2]/d
 toggleButtonXPATH = "/html/body/div[4]/div/div[8]/form/div[2]/div[1]/div[1]/div/div[7]/div[2]/label/div"
 
 
+def wait_for_element_xpath(element_name, element_xpath):
+    try:
+        return (WebDriverWait(driver, 10).until(
+            ec.presence_of_element_located((By.XPATH, element_xpath))
+        ))
+
+    except:
+        print("Error: couldn't click on --> " + element_name)
+        driver.quit()
+
+
+def wait_for_element_id(element_name, element_id):
+    try:
+        return (WebDriverWait(driver, 10).until(
+            ec.presence_of_element_located((By.ID, element_id))
+        ))
+
+    except:
+        print("Error: couldn't click on --> " + element_name)
+        driver.quit()
+
+
 city = driver.find_element_by_class_name("js-multiapp-link")
 city.click()
 
-try:
-    filterButton = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.XPATH, filterButtonXPATH))
-    )
+filterButton = wait_for_element_xpath("filterButton", filterButtonXPATH)
+filterButton.click()
 
-    filterButton.click()
+searchField = driver.find_element_by_id("filter-name-input")
+searchField.send_keys("Salámová")
+searchField.send_keys(Keys.RETURN)
 
-    searchField = driver.find_element_by_id("filter-name-input")
-    searchField.send_keys("Salámová")
-    searchField.send_keys(Keys.RETURN)
+pizza = wait_for_element_xpath("pizza", pizzaXPATH)
+pizza.click()  # TODO Pizza sometimes doesn't show up, needs to be fixed
 
-    pizza = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.XPATH, pizzaXPATH))
-    )
+addToBasketButton = wait_for_element_xpath("addToBasketButton", addToBasketButtonXPATH)
+addToBasketButton.click()
 
-    pizza.click()
+goToBasketButton = driver.find_element_by_xpath(goToBasketButtonXPATH)
+goToBasketButton.click()
 
-    addToBasketButton = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.XPATH, addToBasketButtonXPATH))
-    )
+time.sleep(3)
 
-    addToBasketButton.click()
+continueButton = wait_for_element_xpath("continueButton", continueButtonXPATH)
+continueButton.click()
 
-    goToBasketButton = driver.find_element_by_xpath(goToBasketButtonXPATH)
-    goToBasketButton.click()
+continueButton2 = wait_for_element_xpath("continueButton2", continueButton2XPATH)
+continueButton2.click()
 
-    time.sleep(3)
+continueButton3 = wait_for_element_xpath("continueButton3", continueButton3XPATH)
+continueButton3.click()
 
-    continueButton = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.XPATH, continueButtonXPATH))
-    )
+name = wait_for_element_id("name", "name")
 
-    continueButton.click()
+name.send_keys("Petr")
+surname = driver.find_element_by_id("surmane")
+surname.send_keys("Jeřábek")
+email = driver.find_element_by_id("email")
+email.send_keys("hengrs99@seznam.cz")
+telephone = driver.find_element_by_id("telephone")
+telephone.send_keys("736601539")
 
-    continueButton2 = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.XPATH, continueButton2XPATH))
-    )
-
-    continueButton2.click()
-
-    continueButton3 = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.XPATH, continueButton3XPATH))
-    )
-
-    continueButton3.click()
-
-    name = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.ID, "name"))
-    )
-
-    name.send_keys("Petr")
-    surname = driver.find_element_by_id("surmane")
-    surname.send_keys("Jeřábek")
-    email = driver.find_element_by_id("email")
-    email.send_keys("hengrs99@seznam.cz")
-    telephone = driver.find_element_by_id("telephone")
-    telephone.send_keys("736601539")
-
-    toggleButton = driver.find_element_by_xpath(toggleButtonXPATH)
-    toggleButton.click()
-
-except:
-    driver.quit()
+toggleButton = driver.find_element_by_xpath(toggleButtonXPATH)
+toggleButton.click()
