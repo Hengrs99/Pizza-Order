@@ -4,12 +4,11 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.common.keys import Keys
 import time
+import unidecode
 
-PATH = "C:\Program Files (x86)\chromedriver"
-driver = webdriver.Chrome(PATH)
-driver.maximize_window()
-driver.get("https://www.pizzafantastico.cz/")
-
+loc1XPATH = "/html/body/div[2]/div[5]/a[1]"
+loc2XPATH = "/html/body/div[2]/div[5]/a[2]"
+loc3XPATH = "/html/body/div[2]/div[5]/a[3]"
 filterButtonXPATH = "/html/body/div[4]/div/div[8]/div[5]/div[5]/button"
 pizzaXPATH = "/html/body/div[4]/div/div[8]/div[5]/div[6]/div[11]/div[1]/a/div/div[2]/h4"
 addToBasketButtonXPATH = "/html/body/div[4]/div/div[8]/div[8]/div[1]/div/div[4]/input[1]"
@@ -18,6 +17,30 @@ continueButtonXPATH = "/html/body/div[4]/div/div[8]/div[6]/div/div[6]/div[1]/div
 continueButton2XPATH = "/html/body/div[4]/div/div[8]/div[10]/div[1]/div[4]/div/div[5]/div[2]/a"
 continueButton3XPATH = "/html/body/div[4]/div/div[8]/form/div[1]/div[1]/div[2]/div/div[7]/div[2]/a"
 toggleButtonXPATH = "/html/body/div[4]/div/div[8]/form/div[2]/div[1]/div[1]/div/div[7]/div[2]/label/div"
+
+
+def ask_for_loc_xpath():
+    global locXPATH
+
+    loc1 = "Roztoky"
+    loc2 = "Děčín"
+    loc3 = "Příbram"
+
+    loc = unidecode.unidecode(input("Enter shop location (" + loc1 + ", " + loc2 + ", " + loc3 + "): ").lower())
+
+    if loc == unidecode.unidecode(loc1).lower():
+        locXPATH = loc1XPATH
+    elif loc == unidecode.unidecode(loc2).lower():
+        locXPATH = loc2XPATH
+    elif loc == unidecode.unidecode(loc3).lower():
+        locXPATH = loc3XPATH
+    else:
+        print("Invalid location")
+        time.sleep(1)
+        print()
+        ask_for_loc_xpath()
+
+    return locXPATH
 
 
 def wait_for_element_xpath(element_name, element_xpath):
@@ -42,14 +65,21 @@ def wait_for_element_id(element_name, element_id):
         driver.quit()
 
 
-city = driver.find_element_by_class_name("js-multiapp-link")  # TODO User should be able to choose location of shop
+locXPATH = ask_for_loc_xpath()
+
+PATH = "C:\Program Files (x86)\chromedriver"
+driver = webdriver.Chrome(PATH)
+driver.maximize_window()
+driver.get("https://www.pizzafantastico.cz/")
+
+city = driver.find_element_by_xpath(locXPATH)
 city.click()
 
 filterButton = wait_for_element_xpath("filterButton", filterButtonXPATH)
 filterButton.click()
 
 searchField = driver.find_element_by_id("filter-name-input")
-searchField.send_keys("Salámová")  # TODO User should be able to choose which pizza he wants
+searchField.send_keys("Salámová")  # TODO User should be able to choose which pizza/pizzas he wants
 searchField.send_keys(Keys.RETURN)
 
 pizza = wait_for_element_xpath("pizza", pizzaXPATH)
@@ -60,7 +90,7 @@ addToBasketButton = wait_for_element_xpath("addToBasketButton", addToBasketButto
 # TODO User should be able to choose amount of pizzas he wants
 addToBasketButton.click()
 
-goToBasketButton = driver.find_element_by_xpath(goToBasketButtonXPATH)  # TODO User should be able to continue shopping
+goToBasketButton = driver.find_element_by_xpath(goToBasketButtonXPATH)
 goToBasketButton.click()
 
 time.sleep(3)
