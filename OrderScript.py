@@ -42,37 +42,44 @@ def wait_for_element_id(element_name, element_id):
         driver.quit()
 
 
-city = driver.find_element_by_class_name("js-multiapp-link")
+city = driver.find_element_by_class_name("js-multiapp-link")  # TODO User should be able to choose location of shop
 city.click()
 
 filterButton = wait_for_element_xpath("filterButton", filterButtonXPATH)
 filterButton.click()
 
 searchField = driver.find_element_by_id("filter-name-input")
-searchField.send_keys("Salámová")
+searchField.send_keys("Salámová")  # TODO User should be able to choose which pizza he wants
 searchField.send_keys(Keys.RETURN)
 
 pizza = wait_for_element_xpath("pizza", pizzaXPATH)
-pizza.click()  # TODO Pizza sometimes doesn't show up, needs to be fixed
+# TODO Pizza sometimes doesn't show up, needs to be fixed
+pizza.click()
 
 addToBasketButton = wait_for_element_xpath("addToBasketButton", addToBasketButtonXPATH)
+# TODO User should be able to choose amount of pizzas he wants
 addToBasketButton.click()
 
-goToBasketButton = driver.find_element_by_xpath(goToBasketButtonXPATH)
+goToBasketButton = driver.find_element_by_xpath(goToBasketButtonXPATH)  # TODO User should be able to continue shopping
 goToBasketButton.click()
 
 time.sleep(3)
 
 continueButton = wait_for_element_xpath("continueButton", continueButtonXPATH)
+# TODO User should be able to choose amount of pizzas he wants
 continueButton.click()
 
 continueButton2 = wait_for_element_xpath("continueButton2", continueButton2XPATH)
+# TODO User should be able to choose where he wants to pick up pizza (home or shop)
 continueButton2.click()
 
 continueButton3 = wait_for_element_xpath("continueButton3", continueButton3XPATH)
+# TODO User should be able to pay either with cash or online
 continueButton3.click()
 
 name = wait_for_element_id("name", "name")
+
+# TODO Personal info should be customizable by user
 
 name.send_keys("Petr")
 surname = driver.find_element_by_id("surmane")
