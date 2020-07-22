@@ -9,6 +9,7 @@ import unidecode
 loc1XPATH = "/html/body/div[2]/div[5]/a[1]"
 loc2XPATH = "/html/body/div[2]/div[5]/a[2]"
 loc3XPATH = "/html/body/div[2]/div[5]/a[3]"
+understandButtonXPATH = "/html/body/div[4]/div/div[8]/div[5]/div[7]/button"
 filterButtonXPATH = "/html/body/div[4]/div/div[8]/div[5]/div[5]/button"
 pizzaXPATH = "/html/body/div[4]/div/div[8]/div[5]/div[6]/div[11]/div[1]/a/div/div[2]/h4"
 addToBasketButtonXPATH = "/html/body/div[4]/div/div[8]/div[8]/div[1]/div/div[4]/input[1]"
@@ -34,6 +35,8 @@ def ask_for_loc_xpath():
         locXPATH = loc2XPATH
     elif loc == unidecode.unidecode(loc3).lower():
         locXPATH = loc3XPATH
+    elif loc == "":
+        locXPATH = loc1XPATH
     else:
         print("Invalid location")
         time.sleep(1)
@@ -75,11 +78,14 @@ driver.get("https://www.pizzafantastico.cz/")
 city = driver.find_element_by_xpath(locXPATH)
 city.click()
 
+understandButton = wait_for_element_xpath("understandButton", understandButtonXPATH)
+understandButton.click()
+
 filterButton = wait_for_element_xpath("filterButton", filterButtonXPATH)
 filterButton.click()
 
 searchField = driver.find_element_by_id("filter-name-input")
-searchField.send_keys("Salámová")  # TODO User should be able to choose which pizza/pizzas he wants
+searchField.send_keys("Salámová")  # TODO User should be able to select which pizza he wants
 searchField.send_keys(Keys.RETURN)
 
 pizza = wait_for_element_xpath("pizza", pizzaXPATH)
