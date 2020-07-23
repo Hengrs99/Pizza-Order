@@ -11,13 +11,18 @@ loc2XPATH = "/html/body/div[2]/div[5]/a[2]"
 loc3XPATH = "/html/body/div[2]/div[5]/a[3]"
 understandButtonXPATH = "/html/body/div[4]/div/div[8]/div[5]/div[7]/button"
 filterButtonXPATH = "/html/body/div[4]/div/div[8]/div[5]/div[5]/button"
-pizzaXPATH = "/html/body/div[4]/div/div[8]/div[5]/div[6]/div[11]/div[1]/a/div/div[2]/h4"
+rawPizzaHeaderXPATH = "/html/body/div[4]/div/div[8]/div[5]/div[6]/div[0]/div[1]/a/div/div[2]/h4"
 addToBasketButtonXPATH = "/html/body/div[4]/div/div[8]/div[8]/div[1]/div/div[4]/input[1]"
 goToBasketButtonXPATH = "/html/body/div[4]/div/div[6]/div[1]/div[4]/div[2]/a"
 continueButtonXPATH = "/html/body/div[4]/div/div[8]/div[6]/div/div[6]/div[1]/div[4]/div[2]/a"
 continueButton2XPATH = "/html/body/div[4]/div/div[8]/div[10]/div[1]/div[4]/div/div[5]/div[2]/a"
 continueButton3XPATH = "/html/body/div[4]/div/div[8]/form/div[1]/div[1]/div[2]/div/div[7]/div[2]/a"
 toggleButtonXPATH = "/html/body/div[4]/div/div[8]/form/div[2]/div[1]/div[1]/div/div[7]/div[2]/label/div"
+
+pizzaTypes = ["margherita", "syrova", "sunkova", "capricciosa", "hawaii", "olivova", "marinara", "tunakova",
+              "vegetariana", "salamova", "zampionova", "americana", "dabelska", "fantastico", "farmarska", "sedlacka",
+              "kureci", "crudo", "brusinkova exclusive", "provensalska exclusive", "albori exclusive",
+              "kureci special exclusive"]
 
 
 def ask_for_loc_xpath():
@@ -46,6 +51,27 @@ def ask_for_loc_xpath():
     return locXPATH
 
 
+def ask_for_pizza_name():
+    global isPizzaValid
+    wantedPizza = unidecode.unidecode(input("Enter pizza name: ")).lower()
+    for pizza in pizzaTypes:
+        if pizza == wantedPizza:
+            isPizzaValid = True
+    if isPizzaValid:
+        return wantedPizza
+    else:
+        print("Invalid pizza name")
+        time.sleep(1)
+        print()
+        ask_for_pizza_name()
+
+
+def find_pizza_xpath():
+    for pizza in pizzaTypes:
+        if pizza == selectedPizza:
+            return rawPizzaHeaderXPATH.replace(rawPizzaHeaderXPATH[47], str(pizzaTypes.index(pizza) + 2))
+
+
 def wait_for_element_xpath(element_name, element_xpath):
     try:
         return (WebDriverWait(driver, 10).until(
@@ -69,6 +95,7 @@ def wait_for_element_id(element_name, element_id):
 
 
 locXPATH = ask_for_loc_xpath()
+selectedPizza = ask_for_pizza_name()
 
 PATH = "C:\Program Files (x86)\chromedriver"
 driver = webdriver.Chrome(PATH)
@@ -85,12 +112,14 @@ filterButton = wait_for_element_xpath("filterButton", filterButtonXPATH)
 filterButton.click()
 
 searchField = driver.find_element_by_id("filter-name-input")
-searchField.send_keys("Salámová")  # TODO User should be able to select which pizza he wants
+searchField.send_keys(selectedPizza)
 searchField.send_keys(Keys.RETURN)
 
-pizza = wait_for_element_xpath("pizza", pizzaXPATH)
+pizzaHeaderXPATH = find_pizza_xpath()
+
+pizzaHeader = wait_for_element_xpath("pizzaHeader", pizzaHeaderXPATH)
 # TODO Pizza sometimes doesn't show up, needs to be fixed
-pizza.click()
+pizzaHeader.click()
 
 addToBasketButton = wait_for_element_xpath("addToBasketButton", addToBasketButtonXPATH)
 # TODO User should be able to choose amount of pizzas he wants
