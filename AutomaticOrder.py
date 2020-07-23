@@ -19,57 +19,14 @@ continueButton2XPATH = "/html/body/div[4]/div/div[8]/div[10]/div[1]/div[4]/div/d
 continueButton3XPATH = "/html/body/div[4]/div/div[8]/form/div[1]/div[1]/div[2]/div/div[7]/div[2]/a"
 toggleButtonXPATH = "/html/body/div[4]/div/div[8]/form/div[2]/div[1]/div[1]/div/div[7]/div[2]/label/div"
 
+loc1 = "Roztoky"
+loc2 = "Děčín"
+loc3 = "Příbram"
+
 pizzaTypes = ["margherita", "syrova", "sunkova", "capricciosa", "hawaii", "olivova", "marinara", "tunakova",
               "vegetariana", "salamova", "zampionova", "americana", "dabelska", "fantastico", "farmarska", "sedlacka",
               "kureci", "crudo", "brusinkova exclusive", "provensalska exclusive", "albori exclusive",
               "kureci special exclusive"]
-
-
-def ask_for_loc_xpath():
-    global locXPATH
-
-    loc1 = "Roztoky"
-    loc2 = "Děčín"
-    loc3 = "Příbram"
-
-    loc = unidecode.unidecode(input("Enter shop location (" + loc1 + ", " + loc2 + ", " + loc3 + "): ").lower())
-
-    if loc == unidecode.unidecode(loc1).lower():
-        locXPATH = loc1XPATH
-    elif loc == unidecode.unidecode(loc2).lower():
-        locXPATH = loc2XPATH
-    elif loc == unidecode.unidecode(loc3).lower():
-        locXPATH = loc3XPATH
-    elif loc == "":
-        locXPATH = loc1XPATH
-    else:
-        print("Invalid location")
-        time.sleep(1)
-        print()
-        ask_for_loc_xpath()
-
-    return locXPATH
-
-
-def ask_for_pizza_name():
-    global isPizzaValid
-    wantedPizza = unidecode.unidecode(input("Enter pizza name: ")).lower()
-    for pizza in pizzaTypes:
-        if pizza == wantedPizza:
-            isPizzaValid = True
-    if isPizzaValid:
-        return wantedPizza
-    else:
-        print("Invalid pizza name")
-        time.sleep(1)
-        print()
-        ask_for_pizza_name()
-
-
-def find_pizza_xpath():
-    for pizza in pizzaTypes:
-        if pizza == selectedPizza:
-            return rawPizzaHeaderXPATH.replace(rawPizzaHeaderXPATH[47], str(pizzaTypes.index(pizza) + 2))
 
 
 def wait_for_element_xpath(element_name, element_xpath):
@@ -94,8 +51,119 @@ def wait_for_element_id(element_name, element_id):
         driver.quit()
 
 
-locXPATH = ask_for_loc_xpath()
-selectedPizza = ask_for_pizza_name()
+def treat_user_input(input_text):
+    modifiedInput = unidecode.unidecode(input(input_text)).lower()
+    return modifiedInput
+
+
+def announce_invalid_info(invalid_info):
+    print("Invalid " + invalid_info)
+    time.sleep(1)
+    print()
+
+
+def prepare_default_order():
+    global locXPATH
+    global selectedPizza
+    global personalInfo
+
+    locXPATH = loc1XPATH
+    selectedPizza = ask_for_pizza_name()
+
+    personalInfo = ["Petr", "Jeřábek", "hengrs99@seznam.cz", "736601539"]
+
+
+def prepare_custom_order():
+    global locXPATH
+    global selectedPizza
+    global personalInfo
+
+    locXPATH = find_loc_xpath()
+    selectedPizza = ask_for_pizza_name()
+
+    print()
+
+    personalInfo = [ask_for_personal_info("name"), ask_for_personal_info("surname"), ask_for_personal_info("e-mail"),
+                    ask_for_personal_info("phone number")]
+
+
+def ask_for_personal_info(info_type):
+    info = input("Enter your " + info_type + ": ")
+
+    treat_personal_info_input(info, info_type)
+    return info
+
+
+def treat_personal_info_input(info, info_type):
+    if info_type == "e-mail":
+        if info.find("@") == -1:
+            announce_invalid_info("email")
+            ask_for_personal_info("email")
+    elif info_type == "phone number":
+        for char in info:
+            if not char.isdigit():
+                announce_invalid_info("phone number")
+                ask_for_personal_info("phone number")
+
+        if len(info) > 9 or len(info) < 9:
+            announce_invalid_info("phone number")
+            ask_for_personal_info("phone number")
+
+
+def set_up_order():
+    orderType = treat_user_input("Enter type of order (default/custom): ")
+
+    if orderType == "default" or orderType == "" or orderType == "1":
+        prepare_default_order()
+    elif orderType == "custom" or orderType == "2":
+        prepare_custom_order()
+    else:
+        announce_invalid_info("order type")
+        set_up_order()
+
+
+def find_loc_xpath():
+    global locXPATH
+
+    loc = treat_user_input("Enter shop location (" + loc1 + "/" + loc2 + "/" + loc3 + "): ")
+
+    if loc == unidecode.unidecode(loc1).lower() or loc == "1":
+        locXPATH = loc1XPATH
+    elif loc == unidecode.unidecode(loc2).lower() or loc == "2":
+        locXPATH = loc2XPATH
+    elif loc == unidecode.unidecode(loc3).lower() or loc == "3":
+        locXPATH = loc3XPATH
+    elif loc == "":
+        locXPATH = loc1XPATH
+    else:
+        announce_invalid_info("location")
+        find_loc_xpath()
+
+    return locXPATH
+# TODO This method should be separated to ask_for_loc() and find_loc_xpath()
+
+
+def ask_for_pizza_name():
+    global isPizzaValid
+
+    wantedPizza = treat_user_input("Enter pizza name: ")
+    for pizza in pizzaTypes:
+        if pizza == wantedPizza:
+            isPizzaValid = True
+    if isPizzaValid:
+        return wantedPizza
+    else:
+        announce_invalid_info("pizza name")
+        ask_for_pizza_name()
+
+
+def find_pizza_xpath():
+    for pizza in pizzaTypes:
+        if pizza == selectedPizza:
+            return rawPizzaHeaderXPATH.replace(rawPizzaHeaderXPATH[47], str(pizzaTypes.index(pizza) + 2))
+
+
+set_up_order()
 
 PATH = "C:\Program Files (x86)\chromedriver"
 driver = webdriver.Chrome(PATH)
@@ -131,7 +199,6 @@ goToBasketButton.click()
 time.sleep(3)
 
 continueButton = wait_for_element_xpath("continueButton", continueButtonXPATH)
-# TODO User should be able to choose amount of pizzas he wants
 continueButton.click()
 
 continueButton2 = wait_for_element_xpath("continueButton2", continueButton2XPATH)
@@ -143,16 +210,16 @@ continueButton3 = wait_for_element_xpath("continueButton3", continueButton3XPATH
 continueButton3.click()
 
 name = wait_for_element_id("name", "name")
+name.send_keys(personalInfo[0])
 
-# TODO Personal info should be customizable by user
-
-name.send_keys("Petr")
 surname = driver.find_element_by_id("surmane")
-surname.send_keys("Jeřábek")
+surname.send_keys(personalInfo[1])
+
 email = driver.find_element_by_id("email")
-email.send_keys("hengrs99@seznam.cz")
+email.send_keys(personalInfo[2])
+
 telephone = driver.find_element_by_id("telephone")
-telephone.send_keys("736601539")
+telephone.send_keys(personalInfo[3])
 
 toggleButton = driver.find_element_by_xpath(toggleButtonXPATH)
 toggleButton.click()
